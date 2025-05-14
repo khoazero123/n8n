@@ -7,6 +7,7 @@ import { useLocalStorage } from '@vueuse/core';
 import {
 	LOCAL_STORAGE_LOGS_PANEL_DETAILS_PANEL as LOCAL_STORAGE_LOGS_PANEL_DETAILS_PANEL,
 	LOCAL_STORAGE_LOGS_PANEL_OPEN,
+	LOCAL_STORAGE_LOGS_SYNC_SELECTION,
 } from '@/constants';
 import {
 	LOG_DETAILS_CONTENT,
@@ -22,6 +23,7 @@ export const useCanvasStore = defineStore('canvas', () => {
 	const newNodeInsertPosition = ref<XYPosition | null>(null);
 	const panelHeight = ref(0);
 	const isLogsPanelOpen = useLocalStorage(LOCAL_STORAGE_LOGS_PANEL_OPEN, false);
+	const isLogSelectionSyncedWithCanvas = useLocalStorage(LOCAL_STORAGE_LOGS_SYNC_SELECTION, false);
 	const preferPopOutLogsView = ref(false);
 	const logsPanelState = computed(() =>
 		isLogsPanelOpen.value
@@ -48,6 +50,10 @@ export const useCanvasStore = defineStore('canvas', () => {
 
 	function toggleLogsPanelOpen(isOpen?: boolean) {
 		isLogsPanelOpen.value = isOpen ?? !isLogsPanelOpen.value;
+	}
+
+	function toggleLogSelectionSync(value?: boolean) {
+		isLogSelectionSyncedWithCanvas.value = value ?? !isLogSelectionSyncedWithCanvas.value;
 	}
 
 	function setPreferPoppedOutLogsView(value: boolean) {
@@ -96,6 +102,7 @@ export const useCanvasStore = defineStore('canvas', () => {
 		logsPanelState,
 		isLogsPanelOpen: computed(() => logsPanelState.value !== LOGS_PANEL_STATE.CLOSED),
 		logDetailsPanel: computed(() => logDetailsPanel.value),
+		isLogSelectionSyncedWithCanvas,
 		setPanelHeight,
 		startLoading: loadingService.startLoading,
 		setLoadingText: loadingService.setLoadingText,
@@ -104,5 +111,6 @@ export const useCanvasStore = defineStore('canvas', () => {
 		setPreferPoppedOutLogsView,
 		toggleLogInputOpen,
 		toggleLogOutputOpen,
+		toggleLogSelectionSync,
 	};
 });

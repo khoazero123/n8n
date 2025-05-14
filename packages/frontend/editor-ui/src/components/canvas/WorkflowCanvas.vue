@@ -9,6 +9,7 @@ import { createEventBus } from '@n8n/utils/event-bus';
 import type { CanvasEventBusEvents } from '@/types';
 import { useVueFlow } from '@vue-flow/core';
 import { throttledRef } from '@vueuse/core';
+import CanvasChatSwitch from '@/components/CanvasChat/CanvasChatSwitch.vue';
 
 defineOptions({
 	inheritAttrs: false,
@@ -79,12 +80,14 @@ const mappedConnectionsThrottled = throttledRef(mappedConnections, 200);
 			/>
 		</div>
 		<slot />
+		<CanvasChatSwitch />
 	</div>
 </template>
 
 <style lang="scss" module>
 .wrapper {
-	display: block;
+	display: flex;
+	flex-direction: column;
 	position: relative;
 	width: 100%;
 	height: 100%;

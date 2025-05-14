@@ -7,6 +7,9 @@ import {
 } from '@/components/RunDataAi/utils';
 import { useTelemetry } from '@/composables/useTelemetry';
 import type { IExecutionResponse } from '@/Interface';
+import { useCanvasStore } from '@/stores/canvas.store';
+import { useUIStore } from '@/stores/ui.store';
+import { watch } from 'vue';
 import { computed, ref, type ComputedRef } from 'vue';
 
 export function useSelection(
@@ -17,12 +20,24 @@ export function useSelection(
 	const telemetry = useTelemetry();
 	const manualLogEntrySelection = ref<LogEntrySelection>({ type: 'initial' });
 	const selected = computed(() => findSelectedLogEntry(manualLogEntrySelection.value, tree.value));
+	const canvasStore = useCanvasStore();
+	const uiStore = useUIStore();
+
+	function syncSelectionToCanvasIfEnabled(value: LogEntry) {
+		if (!canvasStore.isLogSelectionSyncedWithCanvas) {
+			return;
+		}
+
+		// TODO
+	}
 
 	function select(value: LogEntry | undefined) {
 		manualLogEntrySelection.value =
 			value === undefined ? { type: 'none' } : { type: 'selected', id: value.id };
 
 		if (value) {
+			syncSelectionToCanvasIfEnabled(value);
+
 			telemetry.track('User selected node in log view', {
 				node_type: value.node.type,
 				node_id: value.node.id,
@@ -39,7 +54,8 @@ export function useSelection(
 			? (getEntryAtRelativeIndex(entries, selected.value.id, -1) ?? entries[0])
 			: entries[entries.length - 1];
 
-		select(prevEntry);
+		manualLogEntrySelection.value = { type: 'selected', id: prevEntry.id };
+		syncSelectionToCanvasIfEnabled(prevEntry);
 	}
 
 	function selectNext() {
@@ -48,8 +64,25 @@ export function useSelection(
 			? (getEntryAtRelativeIndex(entries, selected.value.id, 1) ?? entries[entries.length - 1])
 			: entries[0];
 
-		select(nextEntry);
+		manualLogEntrySelection.value = { type: 'selected', id: nextEntry.id };
+		syncSelectionToCanvasIfEnabled(nextEntry);
 	}
+
+	watch(
+		[() => uiStore.lastSelectedNode, () => canvasStore.isLogSelectionSyncedWithCanvas],
+		([selectedOnCanvas, shouldSync]) => {
+			if (!shouldSync || !selectedOnCanvas) {
+				return;
+			}
+
+			const entry = flatLogEntries.value.find((e) => e.node.name === selectedOnCanvas);
+
+			if (entry) {
+				manualLogEntrySelection.value = { type: 'selected', id: entry.id };
+			}
+		},
+		{ immediate: true },
+	);
 
 	return { selected, select, selectPrev, selectNext };
 }
