@@ -26,7 +26,7 @@ export class EvaluationTrigger implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Evaluation Trigger',
 		icon: 'fa:check-double',
-		name: 'evaluationTrigger',
+		name: 'evaluationNodeTrigger',
 		group: ['trigger'],
 		version: 4.6,
 		description: 'Run a test dataset through your workflow to check performance',
@@ -36,6 +36,13 @@ export class EvaluationTrigger implements INodeType {
 		},
 		inputs: [],
 		outputs: [NodeConnectionTypes.Main],
+		codex: {
+			categories: ['Core Nodes'],
+			subcategories: {
+				'Core Nodes': ['Other Trigger Nodes'],
+			},
+			alias: ['test', 'metrics', 'evals', 'set output', 'set metrics'],
+		},
 		properties: [
 			{
 				displayName:
